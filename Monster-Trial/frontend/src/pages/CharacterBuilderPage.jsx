@@ -123,7 +123,7 @@ export default function CharacterBuilderPage({ initialProfile, actions, loading 
             </label>
           </div>
 
-          <OptionGroup label="Sex" options={builderOptions.genders} value={profile.gender} onChange={(value) => updateField('gender', value)} />
+          <OptionGroup label="Gender" options={builderOptions.genders} value={profile.gender} onChange={(value) => updateField('gender', value)} />
           <OptionGroup label="Class" options={builderOptions.heroClasses} value={profile.heroClass} onChange={updateHeroClass} />
           <OptionGroup label="Weapon" options={builderOptions.weapons} value={profile.weapon} onChange={(value) => updateField('weapon', value)} />
           <OptionGroup label="Skin" options={builderOptions.skinTones} value={profile.skinTone} onChange={(value) => updateField('skinTone', value)} colorSwatches />
