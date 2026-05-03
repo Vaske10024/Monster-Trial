@@ -26,7 +26,10 @@ export default function CharacterAvatar({ profile, variant = 'creator', classNam
     'character-avatar',
     'simple-character-avatar',
     `avatar-${variant}`,
+    `simple-gender-${safeClass(normalized.gender, 'female')}`,
     `simple-class-${safeClass(heroClass, 'knight')}`,
+    `simple-hair-${safeClass(normalized.hairStyle, 'layered')}`,
+    `simple-accessory-${safeClass(normalized.accessory, 'circlet')}`,
     `simple-weapon-${safeClass(normalized.weapon, 'sword')}`,
     className
   ].filter(Boolean).join(' ');
@@ -45,8 +48,12 @@ export default function CharacterAvatar({ profile, variant = 'creator', classNam
         <div className="simple-avatar-arm simple-avatar-arm-left" />
         <div className="simple-avatar-arm simple-avatar-arm-right" />
         <div className="simple-avatar-neck" />
+        <div className="simple-avatar-back-hair" />
         <div className="simple-avatar-head">
           <div className="simple-avatar-hair" />
+          <div className="simple-avatar-face-lock simple-avatar-face-lock-left" />
+          <div className="simple-avatar-face-lock simple-avatar-face-lock-right" />
+          <div className="simple-avatar-accessory" />
           <div className="simple-avatar-eye simple-avatar-eye-left" />
           <div className="simple-avatar-eye simple-avatar-eye-right" />
           <div className="simple-avatar-mouth" />

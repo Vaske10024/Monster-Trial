@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import AnimatedSprite from '../components/AnimatedSprite.jsx';
+import AnimatedSprite, { preloadSprite } from '../components/AnimatedSprite.jsx';
 import CharacterAvatar from '../components/CharacterAvatar.jsx';
 import BattleLog from '../components/BattleLog.jsx';
 import DamageTypeBadge from '../components/DamageTypeBadge.jsx';
@@ -12,6 +12,8 @@ import { animationMap, heroAnimationForSkill } from '../assets/animationMap.js';
 import { staticAssets } from '../assets/assetMap.js';
 
 const sleep = (ms) => new Promise((resolve) => window.setTimeout(resolve, ms));
+const BOSS_HIT_RECOVERY_DELAY_MS = 1000;
+const BOSS_DAMAGE_FLOAT_MS = 2000;
 
 
 function poseForHeroSprite(spriteSrc = '') {
@@ -57,11 +59,24 @@ export default function BattlePage({ run, actions, loading, characterProfile }) 
   const boss = battle?.boss;
   const [heroAnim, setHeroAnim] = useState(animationMap.hero.idle);
   const [bossAnimKey, setBossAnimKey] = useState('idle');
+  const [bossDamageFloats, setBossDamageFloats] = useState([]);
   const [busy, setBusy] = useState(false);
   const [animNonce, setAnimNonce] = useState(0);
 
   const bossAnimations = useMemo(() => animationMap.bosses[boss?.id] || {}, [boss?.id]);
   const background = staticAssets.backgrounds[boss?.id];
+  const heroAnimations = animationMap.hero;
+
+  useEffect(() => {
+    const heroSources = Object.values(heroAnimations)
+      .map((animation) => animation?.src)
+      .filter(Boolean);
+    const bossSources = Object.values(bossAnimations)
+      .map((animation) => animation?.src)
+      .filter(Boolean);
+    heroSources.forEach(preloadSprite);
+    bossSources.forEach(preloadSprite);
+  }, [bossAnimations, heroAnimations]);
 
   useEffect(() => {
     if (!battle) return;
@@ -76,6 +91,19 @@ export default function BattlePage({ run, actions, loading, characterProfile }) 
       setBossAnimKey('idle');
     }
   }, [battle?.result]);
+
+  function triggerBossHitFeedback() {
+    setBossAnimKey('hit');
+  }
+
+  function showBossDamageFloat(damage) {
+    if (!damage || damage <= 0) return;
+    const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    setBossDamageFloats((current) => [...current, { id, damage }]);
+    window.setTimeout(() => {
+      setBossDamageFloats((current) => current.filter((entry) => entry.id !== id));
+    }, BOSS_DAMAGE_FLOAT_MS);
+  }
 
   if (!battle || !boss) {
     return (
@@ -93,21 +121,22 @@ export default function BattlePage({ run, actions, loading, characterProfile }) 
     setBusy(true);
     setAnimNonce((value) => value + 1);
     setHeroAnim(heroAnimationForSkill(skill));
-    setBossAnimKey('hit');
+    await sleep(180);
+    triggerBossHitFeedback();
     try {
+      const previousBossHp = battle.bossHp;
       const updated = await actions.useSkill(skill.id);
       if (!updated?.battle) {
         setHeroAnim(animationMap.hero.idle);
         setBossAnimKey('idle');
         return;
       }
+      const bossDamageTaken = Math.max(0, previousBossHp - updated.battle.bossHp);
+      showBossDamageFloat(bossDamageTaken);
       const result = updated.battle?.result;
-      if (result === 'ONGOING' && !potion.consumesAction) {
+      if (result === 'ONGOING') {
         await sleep(350);
-        setHeroAnim(animationMap.hero.idle);
-        setBossAnimKey('idle');
-      } else if (result === 'ONGOING') {
-        await sleep(350);
+        await sleep(BOSS_HIT_RECOVERY_DELAY_MS);
         setBossAnimKey('attack');
         await sleep(300);
         setHeroAnim(animationMap.hero.hit);
@@ -154,6 +183,7 @@ export default function BattlePage({ run, actions, loading, characterProfile }) 
         setBossAnimKey('idle');
       } else if (result === 'ONGOING') {
         await sleep(350);
+        await sleep(BOSS_HIT_RECOVERY_DELAY_MS);
         setBossAnimKey('attack');
         await sleep(300);
         setHeroAnim(animationMap.hero.hit);
@@ -200,10 +230,6 @@ export default function BattlePage({ run, actions, loading, characterProfile }) 
         </div>
       </section>
 
-      <section className="battle-intent-wrap">
-        <BossIntentPanel intent={battle.bossIntent} phaseTwo={battle.phaseTwo} />
-      </section>
-
       <section className="battle-arena panel">
         <div className="combatant hero-combatant">
           <CharacterAvatar key={`hero-avatar-${heroAnim.src}-${animNonce}`} profile={characterProfile} variant="battle" className={`hero-facing ${poseForHeroSprite(heroAnim.src)}`} ariaLabel={`${characterProfile?.name || 'Hero'} battle avatar`} />
@@ -216,10 +242,31 @@ export default function BattlePage({ run, actions, loading, characterProfile }) 
           </div>
         </div>
 
-        <div className="versus-mark">VS</div>
+        <div className="battle-center-column">
+          <div className="versus-mark">VS</div>
+          <BossIntentPanel intent={battle.bossIntent} phaseTwo={battle.phaseTwo} />
+        </div>
 
         <div className="combatant boss-combatant">
-          <AnimatedSprite key={`boss-${bossAnimKey}-${animNonce}`} {...(bossAnimations[bossAnimKey] || bossAnimations.idle)} fallbackLabel={boss.name} scale={boss.id === 'STONE_GOLEM' || boss.id === 'DRAGON_KING' ? 0.62 : 0.82} />
+          <div className="boss-sprite-shell">
+            <div className="boss-damage-float-layer" aria-hidden="true">
+              {bossDamageFloats.map((entry) => (
+                <span key={entry.id} className="boss-damage-float">-{entry.damage}</span>
+              ))}
+            </div>
+            <AnimatedSprite
+              key={`boss-${bossAnimKey}-${animNonce}`}
+              {...(bossAnimations[bossAnimKey] || bossAnimations.idle)}
+              fallbackLabel={boss.name}
+              scale={
+                boss.id === 'VENOM_SPIDER'
+                  ? 1.23
+                  : boss.id === 'STONE_GOLEM' || boss.id === 'DRAGON_KING'
+                    ? 0.62
+                    : 0.82
+              }
+            />
+          </div>
           <h2>{boss.name}</h2>
           <HpBar current={battle.bossHp} max={battle.bossMaxHp} label="HP" />
           <div className="weak-res-inline">

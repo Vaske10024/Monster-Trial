@@ -535,12 +535,19 @@ button:disabled {
   margin: 8px 0 0;
 }
 
+.battle-center-column {
+  align-self: center;
+  width: min(320px, 100%);
+  display: grid;
+  justify-items: center;
+  gap: 16px;
+}
+
 .hero-facing {
   transform: scaleX(-1);
 }
 
 .versus-mark {
-  align-self: center;
   width: 70px;
   height: 70px;
   display: grid;
@@ -619,6 +626,49 @@ button:disabled {
 .animated-sprite {
   background-repeat: no-repeat;
   image-rendering: auto;
+}
+
+.boss-sprite-shell {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  isolation: isolate;
+}
+
+.boss-damage-float-layer {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% - 12px);
+  transform: translateX(-50%);
+  display: grid;
+  justify-items: center;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.boss-damage-float {
+  color: #ffb2b2;
+  font-size: .95rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-shadow: 0 2px 10px rgba(120, 12, 12, .42);
+  animation: boss-damage-float-up 2s ease-out forwards;
+  white-space: nowrap;
+}
+
+@keyframes boss-damage-float-up {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(.96);
+  }
+  12% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-42px) scale(1);
+  }
 }
 
 .sprite-img {
@@ -744,6 +794,12 @@ button:disabled {
   }
 
   .versus-mark {
+    margin: 0 auto;
+  }
+
+  .battle-center-column {
+    width: 100%;
+    max-width: 420px;
     margin: 0 auto;
   }
 
@@ -908,11 +964,6 @@ button:disabled {
   background: linear-gradient(90deg, #8b5cf6, #f4c76b, #fff1a8);
 }
 
-.battle-intent-wrap {
-  max-width: 1280px;
-  margin: 0 auto 18px;
-}
-
 .boss-intent-card {
   display: grid;
   gap: 10px;
@@ -921,6 +972,7 @@ button:disabled {
   background: linear-gradient(145deg, rgba(41, 32, 55, .96), rgba(18, 18, 30, .96));
   border: 1px solid rgba(244, 199, 107, .32);
   box-shadow: var(--shadow);
+  width: 100%;
 }
 
 .boss-intent-card.danger {
@@ -2418,8 +2470,10 @@ button:disabled {
 .simple-avatar-emblem,
 .simple-avatar-arm,
 .simple-avatar-neck,
+.simple-avatar-back-hair,
 .simple-avatar-head,
 .simple-avatar-hair,
+.simple-avatar-face-lock,
 .simple-avatar-eye,
 .simple-avatar-mouth {
   position: absolute;
@@ -2814,6 +2868,10 @@ button:disabled {
   display: none;
 }
 
+.simple-gender-female {
+  --avatar-scale: calc(var(--avatar-scale, 1) * 0.98);
+}
+
 .simple-avatar-glow {
   bottom: 24px;
   width: 150px;
@@ -2852,11 +2910,47 @@ button:disabled {
   height: 24px;
 }
 
+.simple-avatar-back-hair {
+  left: 50%;
+  bottom: 88px;
+  width: 78px;
+  height: 108px;
+  transform: translateX(-50%);
+  border-radius: 34px 34px 30px 30px;
+  background: transparent;
+  z-index: 2;
+  pointer-events: none;
+}
+
 .simple-avatar-head {
   bottom: 112px;
   width: 92px;
   height: 102px;
   border-radius: 38px 38px 34px 34px;
+}
+
+.simple-gender-female .simple-avatar-body {
+  width: 98px;
+  border-radius: 30px 30px 20px 20px;
+}
+
+.simple-gender-female .simple-avatar-back-hair {
+  width: 68px;
+  height: 142px;
+  bottom: 26px;
+  border-radius: 16px 16px 28px 28px;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--hair-color) 96%, white), color-mix(in srgb, var(--hair-color) 88%, #dbe4ff) 18%, var(--hair-color) 48%, color-mix(in srgb, var(--hair-color) 82%, black));
+  box-shadow:
+    inset 0 -12px 0 rgba(0, 0, 0, .18),
+    inset 0 10px 10px rgba(255, 255, 255, .08);
+  clip-path: polygon(22% 0, 78% 0, 86% 10%, 82% 100%, 18% 100%, 14% 10%);
+}
+
+.simple-gender-female .simple-avatar-head {
+  width: 88px;
+  height: 104px;
+  border-radius: 40px 40px 36px 36px;
 }
 
 .simple-avatar-hair {
@@ -2868,10 +2962,329 @@ button:disabled {
 }
 
 .simple-avatar-hair::after {
+  content: '';
+  position: absolute;
   right: 8px;
   top: 14px;
   width: 18px;
   height: 30px;
+}
+
+.simple-avatar-hair::before,
+.simple-avatar-accessory::before,
+.simple-avatar-accessory::after {
+  content: '';
+  position: absolute;
+}
+
+.simple-gender-female .simple-avatar-hair {
+  left: -9px;
+  right: -9px;
+  top: -11px;
+  height: 42px;
+  border-radius: 42px 42px 10px 10px;
+  background:
+    radial-gradient(circle at 50% 18%, rgba(255, 255, 255, .2), transparent 26%),
+    linear-gradient(180deg, color-mix(in srgb, var(--hair-color) 95%, white), color-mix(in srgb, var(--hair-color) 88%, #dbe4ff) 24%, var(--hair-color) 64%);
+  box-shadow:
+    inset 0 -6px 0 rgba(0, 0, 0, .08),
+    inset 0 10px 12px rgba(255, 255, 255, .06);
+}
+
+.simple-gender-female .simple-avatar-hair::before {
+  left: 2px;
+  top: 16px;
+  width: 18px;
+  height: 46px;
+  border-radius: 10px 10px 14px 16px;
+  transform: none;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--hair-color) 96%, white), var(--hair-color) 56%, rgba(0, 0, 0, .18));
+  box-shadow:
+    inset -4px 0 0 rgba(0, 0, 0, .08),
+    inset 0 8px 8px rgba(255, 255, 255, .05);
+}
+
+.simple-gender-female .simple-avatar-hair::after {
+  right: 2px;
+  top: 16px;
+  width: 18px;
+  height: 46px;
+  border-radius: 10px 10px 16px 14px;
+  transform: none;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--hair-color) 96%, white), var(--hair-color) 56%, rgba(0, 0, 0, .2));
+  box-shadow:
+    inset 4px 0 0 rgba(0, 0, 0, .08),
+    inset 0 8px 8px rgba(255, 255, 255, .05);
+}
+
+.simple-avatar-face-lock {
+  display: none;
+  pointer-events: none;
+}
+
+.simple-gender-female .simple-avatar-face-lock {
+  display: block;
+  top: 26px;
+  width: 18px;
+  height: 102px;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--hair-color) 96%, white), var(--hair-color) 56%, color-mix(in srgb, var(--hair-color) 84%, black));
+  box-shadow:
+    inset 0 8px 8px rgba(255, 255, 255, .06),
+    inset 0 -10px 0 rgba(0, 0, 0, .14);
+  z-index: 1;
+}
+
+.simple-gender-female .simple-avatar-face-lock-left {
+  left: 4px;
+  border-radius: 10px 10px 14px 18px;
+  clip-path: polygon(24% 0, 100% 0, 92% 82%, 72% 100%, 10% 94%, 0 14%);
+}
+
+.simple-gender-female .simple-avatar-face-lock-right {
+  right: 4px;
+  border-radius: 10px 10px 18px 14px;
+  clip-path: polygon(0 0, 76% 0, 100% 14%, 90% 94%, 28% 100%, 8% 82%);
+}
+
+.simple-gender-female .simple-avatar-head::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 12px;
+  width: 62px;
+  height: 20px;
+  transform: translateX(-50%);
+  border-radius: 0 0 10px 10px;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--hair-color) 92%, white), var(--hair-color));
+  clip-path: polygon(0 0, 100% 0, 100% 48%, 72% 48%, 50% 100%, 28% 48%, 0 48%);
+  box-shadow: 0 4px 0 rgba(0, 0, 0, .06);
+}
+
+.simple-hair-cropped .simple-avatar-hair {
+  left: -3px;
+  right: -3px;
+  top: -4px;
+  height: 34px;
+  border-radius: 34px 34px 14px 14px;
+}
+
+.simple-hair-cropped .simple-avatar-hair::before {
+  display: none;
+}
+
+.simple-hair-cropped .simple-avatar-hair::after {
+  right: 10px;
+  top: 10px;
+  width: 14px;
+  height: 20px;
+}
+
+.simple-gender-female.simple-hair-cropped .simple-avatar-head::before {
+  width: 48px;
+  height: 16px;
+  top: 10px;
+  clip-path: polygon(0 0, 100% 0, 86% 100%, 50% 70%, 14% 100%);
+}
+
+.simple-gender-female.simple-hair-cropped .simple-avatar-back-hair {
+  width: 46px;
+  height: 44px;
+  bottom: 90px;
+  border-radius: 14px 14px 14px 14px;
+}
+
+.simple-gender-female.simple-hair-cropped .simple-avatar-face-lock {
+  top: 28px;
+  width: 14px;
+  height: 58px;
+}
+
+.simple-hair-ponytail .simple-avatar-hair::before {
+  left: 50%;
+  top: 34px;
+  width: 20px;
+  height: 68px;
+  transform: translateX(20px);
+  border-radius: 16px 16px 26px 26px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--hair-color) 86%, white), rgba(0, 0, 0, .24));
+  box-shadow: inset 0 10px 10px rgba(255, 255, 255, .05);
+}
+
+.simple-hair-ponytail .simple-avatar-hair::after {
+  right: 8px;
+  top: 18px;
+  width: 20px;
+  height: 40px;
+  border-radius: 18px 20px 22px 20px;
+}
+
+.simple-gender-female.simple-hair-ponytail .simple-avatar-back-hair {
+  width: 52px;
+  height: 146px;
+  bottom: 22px;
+  border-radius: 18px 18px 26px 26px;
+  clip-path: polygon(28% 0, 72% 0, 80% 10%, 78% 100%, 22% 100%, 20% 10%);
+}
+
+.simple-gender-female.simple-hair-ponytail .simple-avatar-back-hair::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 18px;
+  width: 16px;
+  height: 112px;
+  transform: translateX(5px);
+  border-radius: 16px 16px 24px 24px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--hair-color) 92%, white), color-mix(in srgb, var(--hair-color) 82%, black));
+  box-shadow: inset 0 10px 8px rgba(255, 255, 255, .08);
+}
+
+.simple-gender-female.simple-hair-ponytail .simple-avatar-face-lock {
+  height: 108px;
+}
+
+.simple-hair-braided .simple-avatar-hair::before {
+  left: 6px;
+  top: 22px;
+  width: 18px;
+  height: 62px;
+  border-radius: 14px;
+  background:
+    radial-gradient(circle at 50% 9px, rgba(255, 255, 255, .18) 0 3px, transparent 3px),
+    linear-gradient(180deg, var(--hair-color), rgba(0, 0, 0, .22));
+  background-size: 100% 18px, 100% 100%;
+  box-shadow: inset -3px 0 0 rgba(0, 0, 0, .08);
+}
+
+.simple-gender-female.simple-hair-braided .simple-avatar-back-hair {
+  width: 54px;
+  height: 146px;
+  bottom: 22px;
+  border-radius: 18px 18px 26px 26px;
+  clip-path: polygon(28% 0, 72% 0, 80% 10%, 78% 100%, 22% 100%, 20% 10%);
+}
+
+.simple-gender-female.simple-hair-braided .simple-avatar-back-hair::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 18px;
+  width: 16px;
+  height: 104px;
+  transform: translateX(-50%);
+  border-radius: 14px;
+  background:
+    radial-gradient(circle at 50% 9px, rgba(255, 255, 255, .16) 0 3px, transparent 3px),
+    linear-gradient(180deg, color-mix(in srgb, var(--hair-color) 92%, white), color-mix(in srgb, var(--hair-color) 82%, black));
+  background-size: 100% 18px, 100% 100%;
+}
+
+.simple-gender-female.simple-hair-braided .simple-avatar-face-lock {
+  height: 106px;
+}
+
+.simple-hair-layered .simple-avatar-hair::before {
+  left: 0;
+  top: 20px;
+  width: 20px;
+  height: 40px;
+  border-radius: 16px 16px 20px 18px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--hair-color) 84%, white), rgba(0, 0, 0, .18));
+}
+
+.simple-hair-layered .simple-avatar-hair::after {
+  right: 3px;
+  top: 18px;
+  width: 24px;
+  height: 46px;
+  border-radius: 18px 20px 24px 20px;
+}
+
+.simple-gender-female.simple-hair-layered .simple-avatar-back-hair {
+  width: 68px;
+  height: 148px;
+  bottom: 18px;
+  border-radius: 16px 16px 30px 30px;
+  clip-path: polygon(22% 0, 78% 0, 86% 10%, 82% 100%, 18% 100%, 14% 10%);
+}
+
+.simple-gender-female.simple-hair-layered .simple-avatar-face-lock {
+  height: 112px;
+}
+
+.simple-avatar-accessory {
+  top: 6px;
+  left: 50%;
+  width: 72px;
+  height: 22px;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.simple-accessory-none .simple-avatar-accessory,
+.simple-accessory-none .simple-avatar-accessory::before,
+.simple-accessory-none .simple-avatar-accessory::after {
+  display: none;
+}
+
+.simple-accessory-circlet .simple-avatar-accessory::before {
+  left: 6px;
+  right: 6px;
+  top: 0;
+  height: 8px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #b97a2c, #ffe19b, #b97a2c);
+  box-shadow: 0 0 10px rgba(255, 225, 155, .18);
+}
+
+.simple-accessory-circlet .simple-avatar-accessory::after {
+  left: 50%;
+  top: 2px;
+  width: 12px;
+  height: 12px;
+  transform: translateX(-50%) rotate(45deg);
+  border-radius: 3px;
+  background: linear-gradient(180deg, #fff4c8, #c88a35);
+}
+
+.simple-accessory-ribbon .simple-avatar-accessory::before {
+  right: 2px;
+  top: 26px;
+  width: 20px;
+  height: 12px;
+  border-radius: 10px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--cloak-color) 82%, white), var(--cloak-color));
+}
+
+.simple-accessory-ribbon .simple-avatar-accessory::after {
+  right: 8px;
+  top: 34px;
+  width: 10px;
+  height: 18px;
+  border-radius: 4px 4px 10px 10px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--cloak-color) 82%, white), rgba(0, 0, 0, .22));
+}
+
+.simple-accessory-earring .simple-avatar-accessory::before {
+  right: 8px;
+  top: 32px;
+  width: 4px;
+  height: 16px;
+  border-radius: 999px;
+  background: #d59a43;
+}
+
+.simple-accessory-earring .simple-avatar-accessory::after {
+  right: 4px;
+  top: 44px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff0b9 0 35%, #d59a43 45% 100%);
 }
 
 .simple-avatar-eye {

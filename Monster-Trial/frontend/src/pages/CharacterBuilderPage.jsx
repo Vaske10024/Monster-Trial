@@ -17,6 +17,14 @@ const weaponByClass = {
   rogue: 'dagger'
 };
 
+function labelize(value = '') {
+  return String(value)
+    .split(/[-_\s]+/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ');
+}
+
 function OptionGroup({ label, options, value, onChange, colorSwatches = false }) {
   return (
     <div className="builder-group panel simple-builder-group">
@@ -59,8 +67,10 @@ function CharacterPreview({ profile }) {
       </div>
 
       <div className="simple-preview-tags">
+        <span className="stat-chip">{profile.gender === 'female' ? 'Female' : 'Male'}</span>
         <span className="stat-chip">{profile.title}</span>
-        <span className="stat-chip">{profile.weapon}</span>
+        <span className="stat-chip">{labelize(profile.weapon)}</span>
+        <span className="stat-chip">{labelize(profile.hairStyle)}</span>
       </div>
       <p className="fine-print">Your weapon shapes your starter skills and opening stat bonus.</p>
     </div>
@@ -113,10 +123,12 @@ export default function CharacterBuilderPage({ initialProfile, actions, loading 
             </label>
           </div>
 
+          <OptionGroup label="Sex" options={builderOptions.genders} value={profile.gender} onChange={(value) => updateField('gender', value)} />
           <OptionGroup label="Class" options={builderOptions.heroClasses} value={profile.heroClass} onChange={updateHeroClass} />
           <OptionGroup label="Weapon" options={builderOptions.weapons} value={profile.weapon} onChange={(value) => updateField('weapon', value)} />
           <OptionGroup label="Skin" options={builderOptions.skinTones} value={profile.skinTone} onChange={(value) => updateField('skinTone', value)} colorSwatches />
           <OptionGroup label="Hair" options={builderOptions.hairColors} value={profile.hairColor} onChange={(value) => updateField('hairColor', value)} colorSwatches />
+          <OptionGroup label="Hair Style" options={builderOptions.hairStyles} value={profile.hairStyle} onChange={(value) => updateField('hairStyle', value)} />
           <OptionGroup label="Cloak" options={builderOptions.cloakColors} value={profile.cloakColor} onChange={(value) => updateField('cloakColor', value)} colorSwatches />
           <OptionGroup label="Eyes" options={builderOptions.eyeColors} value={profile.eyeColor} onChange={(value) => updateField('eyeColor', value)} colorSwatches />
         </div>
