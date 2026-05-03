@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if command -v mvn >/dev/null 2>&1; then
+  exec mvn "$@"
+fi
+
+MAVEN_VERSION="3.9.15"
+WRAPPER_DIR="$(cd "$(dirname "$0")" && pwd)/.mvn/wrapper"
+MAVEN_HOME="$WRAPPER_DIR/apache-maven-$MAVEN_VERSION"
+ARCHIVE="$WRAPPER_DIR/apache-maven-$MAVEN_VERSION-bin.tar.gz"
+URL="https://dlcdn.apache.org/maven/maven-3/$MAVEN_VERSION/binaries/apache-maven-$MAVEN_VERSION-bin.tar.gz"
+
+mkdir -p "$WRAPPER_DIR"
+if [ ! -x "$MAVEN_HOME/bin/mvn" ]; then
+  echo "Maven is not installed. Downloading Apache Maven $MAVEN_VERSION..."
+  if command -v curl >/dev/null 2>&1; then
+    curl -fsSL "$URL" -o "$ARCHIVE"
+  elif command -v wget >/dev/null 2>&1; then
+    wget -q "$URL" -O "$ARCHIVE"
+  else
+    echo "Neither mvn, curl, nor wget is available. Install Maven or add curl/wget." >&2
+    exit 1
+  fi
+  tar -xzf "$ARCHIVE" -C "$WRAPPER_DIR"
+fi
+
+exec "$MAVEN_HOME/bin/mvn" "$@"
